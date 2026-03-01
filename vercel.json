@@ -23,8 +23,6 @@
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS, DELETE, PUT" },
         { "key": "Access-Control-Allow-Headers", "value": "Authorization, Content-Type" },
-
-        /* 🔥 This is the important change */
         { "key": "Authorization", "value": ":Authorization" }
       ]
     }
