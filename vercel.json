@@ -10,10 +10,10 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "config/wsgi.py"
+      "source": "/(.*)",
+      "destination": "config/wsgi.py"
     }
   ],
   "headers": [
