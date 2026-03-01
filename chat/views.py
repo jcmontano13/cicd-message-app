@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from .models import UserProfile
 from .serializers import UserProfileSerializer
@@ -14,8 +14,6 @@ import json
 
 class RegisterView(APIView):
     def post(self, request):
-
-        # --- Normalize request data for JSON, form-data, and Vercel wrapper ---
         content_type = request.content_type or ""
 
         if "_content" in request.POST:
@@ -34,35 +32,19 @@ class RegisterView(APIView):
         password = request_data.get("password")
 
         if not username or not password:
-            return Response(
-                {"error": "username and password are required"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "username and password are required"}, status=400)
 
         if User.objects.filter(username=username).exists():
-            return Response(
-                {"error": "Username already exists"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Username already exists"}, status=400)
 
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password
-        )
-
+        user = User.objects.create_user(username=username, email=email, password=password)
         UserProfile.objects.create(user=user)
 
-        return Response(
-            {"message": "Registration successful"},
-            status=status.HTTP_201_CREATED
-        )
+        return Response({"message": "Registration successful"}, status=201)
 
 
 class LoginView(APIView):
     def post(self, request):
-
-        # --- Normalize request data (same logic as RegisterView) ---
         content_type = request.content_type or ""
 
         if "_content" in request.POST:
@@ -80,18 +62,12 @@ class LoginView(APIView):
         password = request_data.get("password")
 
         if not username or not password:
-            return Response(
-                {"error": "username and password are required"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "username and password are required"}, status=400)
 
         user = authenticate(username=username, password=password)
 
         if not user:
-            return Response(
-                {"error": "Invalid username or password"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Invalid username or password"}, status=400)
 
         token, created = Token.objects.get_or_create(user=user)
 
@@ -100,7 +76,6 @@ class LoginView(APIView):
             "user_id": user.id,
             "username": user.username
         })
-
 
 
 class LogoutView(APIView):
@@ -121,7 +96,6 @@ class ProfileView(APIView):
 
     def put(self, request):
         profile = request.user.userprofile
-
         content_type = request.content_type or ""
 
         if "_content" in request.POST:
@@ -143,3 +117,11 @@ class ProfileView(APIView):
             return Response(serializer.data)
 
         return Response(serializer.errors, status=400)
+
+
+# 🔍 DEBUG ENDPOINT — to check if Vercel forwards Authorization header
+class DebugHeaders(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response(dict(request.headers))
