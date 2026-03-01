@@ -1,28 +1,20 @@
-# chat/views.py
-from django.contrib.auth.models import User
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import UserProfile
-
-
 class RegisterView(APIView):
     def post(self, request):
 
-        # DEBUG LOGGING
-        print("=== DEBUG START ===")
-        print("CONTENT TYPE:", request.content_type)
-        print("RAW BODY:", request.body)
-        print("POST DATA:", request.POST)
-        print("DATA:", request.data)
-        print("=== DEBUG END ===")
-
         content_type = request.content_type or ""
 
-        if "application/x-www-form-urlencoded" in content_type:
+        # --- Handle Vercel JSON-wrapped-as-form-data ---
+        if "_content" in request.POST:
+            import json
+            try:
+                request_data = json.loads(request.POST["_content"])
+            except json.JSONDecodeError:
+                request_data = {}
+        # --- Normal form-data ---
+        elif "application/x-www-form-urlencoded" in content_type or \
+             "multipart/form-data" in content_type:
             request_data = request.POST
-        elif "multipart/form-data" in content_type:
-            request_data = request.POST
+        # --- Normal JSON (local dev) ---
         else:
             request_data = request.data
 
