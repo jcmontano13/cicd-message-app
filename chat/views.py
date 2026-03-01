@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from .models import UserProfile
+from .serializers import UserProfileSerializer
+
 import json
 
 
@@ -107,3 +109,37 @@ class LogoutView(APIView):
     def post(self, request):
         request.user.auth_token.delete()
         return Response({"message": "Logged out successfully"}, status=200)
+
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = request.user.userprofile
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data)
+
+    def put(self, request):
+        profile = request.user.userprofile
+
+        content_type = request.content_type or ""
+
+        if "_content" in request.POST:
+            try:
+                request_data = json.loads(request.POST["_content"])
+            except json.JSONDecodeError:
+                request_data = {}
+        elif "multipart/form-data" in content_type:
+            request_data = request.data
+        elif "application/x-www-form-urlencoded" in content_type:
+            request_data = request.POST
+        else:
+            request_data = request.data
+
+        serializer = UserProfileSerializer(profile, data=request_data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=400)
