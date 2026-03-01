@@ -6,7 +6,7 @@ __pycache__/
 *.pkl
 *.pdb
 
-# Virtual environment
+# Virtual environments
 venv/
 env/
 
@@ -18,7 +18,7 @@ db.sqlite3
 media/
 staticfiles/
 
-# Migrations (optional: keep if you want full history)
+# Migrations (optional)
 # */migrations/*
 # !*/migrations/__init__.py
 
@@ -31,12 +31,11 @@ staticfiles/
 .DS_Store
 Thumbs.db
 
-# PyCharm
-*.idea/
+# PyCharm (cleaned)
 *.ipr
 *.iws
 
-# Byte-compiled / optimized / DLL files
+# Compiled extensions
 *.so
 
 # Environment variables
@@ -50,8 +49,4 @@ Thumbs.db
 *.pid.lock
 
 # Coverage / testing
-htmlcov/
-.coverage
-.coverage.*
-.cache
-pytest_cache/
+htmlcov
